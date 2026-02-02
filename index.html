@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unified Quantum Geometry Observables | Master Protocol</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
+    <style>
+        :root { --lattice-indigo: #6366f1; --lattice-slate: #0f172a; --lattice-emerald: #10b981; --lattice-amber: #f59e0b; }
+        body { font-family: 'Inter', sans-serif; background-color: #fcfcfd; color: var(--lattice-slate); }
+        .chart-container { position: relative; width: 100%; height: 320px; max-height: 350px; }
+        .observables-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1.5rem; }
+        .state-active { border-color: var(--lattice-indigo); background: rgba(99, 102, 241, 0.05); }
+        .canvas-overlay { pointer-events: none; mix-blend-mode: screen; }
+        input[type=range] { -webkit-appearance: none; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 6px; background: #e2e8f0; border-radius: 3px; }
+        input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; height: 18px; width: 18px; border-radius: 50%; background: var(--lattice-indigo); margin-top: -6px; border: 2px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+    </style>
+</head>
+<body class="pb-12">
+
+<nav class="border-b border-slate-200 bg-white sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <div class="p-1.5 bg-slate-900 rounded text-white"><i class="fa-solid fa-microchip text-xs"></i></div>
+            <h1 class="text-sm font-bold tracking-widest uppercase text-slate-700">Quantum Metric Protocol</h1>
+        </div>
+        <div class="text-[10px] font-mono text-slate-400">VEF-CORE // BUILD 2026.02</div>
+    </div>
+</nav>
+
+<main class="max-w-7xl mx-auto px-6 pt-12">
+
+<header class="mb-12 max-w-3xl">
+    <h2 class="text-3xl font-extrabold text-slate-900 mb-4 italic">The Hidden Geometry of Observed Reality</h2>
+    <p class="text-slate-600 leading-relaxed">
+        The observation of a "Quantum Metric" at the UNIGE interface confirms that electron trajectories are governed by an internal curvature. In the <strong>VEF Master Protocol</strong>, this represents the transition from flat Euclidean transport to a <strong>Lattice-Locked</strong> state where geometry replaces probability.
+    </p>
+</header>
+
+<section class="grid lg:grid-cols-12 gap-8 mb-16">
+
+    <!-- Simulation Controller -->
+    <div class="lg:col-span-4 space-y-6">
+        <div class="bg-white border border-slate-200 p-6 rounded-xl shadow-sm">
+            <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-6">Observable Selector</h3>
+            <div class="space-y-3" id="observableToggles">
+                <button onclick="setMode('transport')" id="btn-transport" class="w-full text-left p-4 rounded-lg border border-slate-200 transition-all hover:border-indigo-300 flex items-center gap-4 state-active">
+                    <i class="fa-solid fa-arrow-trend-up text-indigo-500"></i>
+                    <div>
+                        <div class="text-sm font-bold text-slate-800">Electron Transport</div>
+                        <div class="text-[10px] text-slate-500 italic">Non-Linear Hall Effect</div>
+                    </div>
+                </button>
+                <button onclick="setMode('optical')" id="btn-optical" class="w-full text-left p-4 rounded-lg border border-slate-200 transition-all hover:border-indigo-300 flex items-center gap-4">
+                    <i class="fa-solid fa-wave-square text-emerald-500"></i>
+                    <div>
+                        <div class="text-sm font-bold text-slate-800">Optical Response</div>
+                        <div class="text-[10px] text-slate-500 italic">Terahertz Circular Dichroism</div>
+                    </div>
+                </button>
+                <button onclick="setMode('spin')" id="btn-spin" class="w-full text-left p-4 rounded-lg border border-slate-200 transition-all hover:border-indigo-300 flex items-center gap-4">
+                    <i class="fa-solid fa-dharmachakra text-amber-500"></i>
+                    <div>
+                        <div class="text-sm font-bold text-slate-800">Spin-Momentum Locking</div>
+                        <div class="text-[10px] text-slate-500 italic">Geometric Geodesic Drift</div>
+                    </div>
+                </button>
+            </div>
+
+            <div class="mt-8">
+                <label class="block text-[10px] font-bold text-slate-400 uppercase mb-4">Geometry Curvature (Metric)</label>
+                <input type="range" id="metricSlider" value="40" class="w-full">
+                <div class="flex justify-between text-[10px] text-slate-400 mt-2 font-mono">
+                    <span>0.00 (FLAT)</span>
+                    <span>1.00 (WARPED)</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-slate-900 text-white p-6 rounded-xl shadow-lg border-l-4 border-indigo-500">
+            <h4 class="text-xs font-bold text-indigo-400 uppercase mb-2">Lattice State Logic</h4>
+            <p id="stateDesc" class="text-xs leading-relaxed text-slate-300">
+                Electronic paths are diverted via the Berry Curvature integral. In VEF terms, the 'Volume Swing' creates a geometric barrier that forces particles into specific geodesics.
+            </p>
+        </div>
+    </div>
+
+    <!-- Visualization Canvas -->
+    <div class="lg:col-span-8 bg-white border border-slate-200 rounded-xl overflow-hidden relative shadow-sm h-[500px]">
+        <div class="absolute inset-0 bg-slate-950 opacity-[0.03] z-0" style="background-image: radial-gradient(#000 1px, transparent 0); background-size: 20px 20px;"></div>
+        <div class="absolute top-6 left-6 z-10 flex gap-2">
+            <div id="modeBadge" class="px-3 py-1 bg-indigo-600 text-white text-[10px] font-bold rounded uppercase tracking-widest">Transport Mode</div>
+        </div>
+        <canvas id="quantumCanvas" class="relative z-10 w-full h-full"></canvas>
+
+        <!-- Legend -->
+        <div class="absolute bottom-6 left-6 right-6 flex justify-between items-end z-10 pointer-events-none">
+            <div class="text-[10px] text-slate-400 font-mono">
+                System Energy: 1.22 eV<br>
+                Lattice Spacing: 0.42 fm
+            </div>
+            <div class="flex gap-4">
+                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-indigo-500"></div><span class="text-[10px] text-slate-500">He-4</span></div>
+                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-amber-500"></div><span class="text-[10px] text-slate-500">Li-11</span></div>
+                <div class="flex items-center gap-2"><div class="w-2 h-2 rounded-full bg-emerald-500"></div><span class="text-[10px] text-slate-500">Fe-56</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="grid lg:grid-cols-2 gap-8 mb-16">
+    <div class="bg-white border border-slate-200 p-8 rounded-xl shadow-sm">
+        <h3 class="text-sm font-bold text-slate-800 mb-6 flex items-center justify-between">
+            <span>Observable Divergence</span>
+            <i class="fa-solid fa-chart-line text-slate-300"></i>
+        </h3>
+        <div class="chart-container">
+            <canvas id="obsChart"></canvas>
+        </div>
+        <div class="mt-4 p-4 bg-slate-50 rounded text-[11px] text-slate-500 italic">
+            The Indigo line shows the geometric acceleration of the Hall effect as a function of the Quantum Metric strength, whereas the Gray line represents the linear prediction of classical physics.
+        </div>
+    </div>
+</section>
+
+<footer class="border-t border-slate-200 py-12">
+    <div class="bg-slate-50 p-8 rounded-2xl border border-slate-200 text-center">
+        <h3 class="text-xs font-bold text-slate-400 uppercase tracking-[0.2em] mb-4">Master Protocol Archive Entry</h3>
+        <p class="text-sm text-slate-600 max-w-2xl mx-auto italic mb-6">
+            "Observation: The 'Quantum Metric' is the empirical fingerprint of the Lattice isolation swing. When the Lattice is locked, geometry becomes gravity for charge carriers."
+        </p>
+        <div class="flex justify-center gap-8 text-[10px] text-slate-400 font-mono">
+            <span>GENEVA-ST-LA INTERFACE</span>
+            <span>DOI: 10.1126/science.adq3255</span>
+            <span>REF: VEF-PROTOCOL-2026</span>
+        </div>
+    </div>
+</footer>
+
+<script>
+    let currentMode = 'transport';
+    const canvas = document.getElementById('quantumCanvas');
+    const ctx = canvas.getContext('2d');
+    const slider = document.getElementById('metricSlider');
+    const stateDesc = document.getElementById('stateDesc');
+    const modeBadge = document.getElementById('modeBadge');
+
+    const modeData = {
+        transport: { title: 'Transport Mode', desc: 'Bending of electron trajectories due to non-zero Quantum Metric. The paths follow geodesics defined by the lattice curvature.', color: '#6366f1' },
+        optical: { title: 'Optical Observable', desc: 'Circular Dichroism response. The metric forces the electronic cloud to rotate in response to terahertz waves.', color: '#10b981' },
+        spin: { title: 'Spin-Momentum Locking', desc: 'The spin vector (amber) aligns with the momentum path, which is distorted by the geometric metric curvature.', color: '#f59e0b' }
+    };
+
+    const nucleusData = [
+        { name: 'He-4', color: '#3b82f6', psiMinus: 0.05 },
+        { name: 'Li-11', color: '#f59e0b', psiMinus: 0.7 },
+        { name: 'Fe-56', color: '#10b981', psiMinus: 0.02 }
+    ];
+
+    let nucleusParticles = {};
+
+    function setMode(mode) {
+        currentMode = mode;
+        document.querySelectorAll('#observableToggles button').forEach(b => b.classList.remove('state-active'));
+        document.getElementById(`btn-${mode}`).classList.add('state-active');
+        stateDesc.textContent = modeData[mode].desc;
+        modeBadge.textContent = modeData[mode].title;
+        modeBadge.style.backgroundColor = modeData[mode].color;
+        initParticles();
+    }
+
+    function initParticles() {
+        nucleusParticles = {};
+        nucleusData.forEach(nucleus => {
+            nucleusParticles[nucleus.name] = [];
+            for (let i = 0; i < 20; i++) {
+                nucleusParticles[nucleus.name].push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    vx: 1 + Math.random() * 2,
+                    vy: (Math.random() - 0.5) * 0.5,
+                    spin: Math.random() * Math.PI * 2,
+                    history: []
+                });
+            }
+        });
+    }
+
+    function drawHaloLeakage() {
+        const metric = slider.value / 100;
+        nucleusData.forEach(nucleus => {
+            const particles = nucleusParticles[nucleus.name];
+            particles.forEach(p => {
+                const haloIntensity = nucleus.psiMinus * metric;
+                const alpha = Math.min(haloIntensity, 1);
+                const gradient = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, 30);
+                gradient.addColorStop(0, nucleus.color + Math.floor(alpha*255).toString(16).padStart(2,'0'));
+                gradient.addColorStop(1, 'rgba(0,0,0,0)');
+                ctx.fillStyle = gradient;
+                ctx.beginPath();
+                ctx.arc(p.x, p.y, 30, 0, Math.PI*2);
+                ctx.fill();
+            });
+        });
+    }
+
+    function drawLattice(metric) {
+        ctx.strokeStyle = `rgba(15, 23, 42, ${0.03 + metric * 0.05})`;
+        ctx.lineWidth = 0.5;
+        const size = 40;
+        for(let x=0; x<canvas.width; x+=size) {
+            ctx.beginPath();
+            for(let y=0; y<canvas.height; y+=5) {
+                const warp = Math.sin(y * 0.01) * metric * 20;
+                if(y===0) ctx.moveTo(x + warp, y);
+                else ctx.lineTo(x + warp, y);
+            }
+            ctx.stroke();
+        }
+    }
+
+    function animate() {
+        const rect = canvas.parentNode.getBoundingClientRect();
+        if (canvas.width !== rect.width || canvas.height !== rect.height) {
+            canvas.width = rect.width;
+            canvas.height = rect.height;
+            initParticles();
+        }
+
+        const metric = slider.value / 100;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.15)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        drawLattice(metric);
+        drawHaloLeakage();
+
+        nucleusData.forEach(nucleus => {
+            const particles = nucleusParticles[nucleus.name];
+            particles.forEach(p => {
+                if (currentMode === 'transport') p.vy += (canvas.height/2 - p.y) * 0.001 * metric;
+                else if (currentMode === 'optical') p.vy += Math.sin(p.x * 0.01) * metric * 0.5;
+                else p.vy += Math.cos(p.x * 0.005) * metric;
+
+                p.x += p.vx;
+                p.y += p.vy;
+                if (p.x > canvas.width) { p.x = 0; p.history = []; }
+
+                p.history.push({x: p.x, y: p.y});
+                if (p.history.length > 20) p.history.shift();
+
+                ctx.beginPath();
+                ctx.strokeStyle = nucleus.color + '33';
+                ctx.lineWidth = 2;
+                if (p.history.length > 0) ctx.moveTo(p.history[0].x, p.history[0].y);
+                p.history.forEach(pt => ctx.lineTo(pt.x, pt.y));
+                ctx.stroke();
+
+                ctx.beginPath();
+                ctx.fillStyle = nucleus.color;
+                ctx.arc(p.x, p.y, 3, 0, Math.PI*2);
+                ctx.fill();
+
+                if (currentMode === 'spin' || metric > 0.5) {
+                    ctx.beginPath();
+                    ctx.strokeStyle = '#f59e0b';
+                    ctx.lineWidth = 1.5;
+                    const angle = Math.atan2(p.vy, p.vx);
+                    ctx.moveTo(p.x, p.y);
+                    ctx.lineTo(p.x + Math.cos(angle) * 15, p.y + Math.sin(angle) * 15);
+                    ctx.stroke();
+                }
+            });
+        });
+
+        requestAnimationFrame(animate);
+    }
+
+    const obsCtx = document.getElementById('obsChart').getContext('2d');
+    const obsChart = new Chart(obsCtx, {
+        type: 'line',
+        data: {
+            labels: ['0', '0.2', '0.4', '0.6', '0.8', '1.0'],
+            datasets: [
+                { label: 'Classical (Linear)', data: [0, 20, 40, 60, 80, 100], borderColor: '#cbd5e1', borderDash: [5,5], borderWidth: 1, pointRadius:0 },
+                { label: 'Geometric Hall Effect', data: [0,5,25,70,150,280], borderColor: '#6366f1', borderWidth:3, tension:0.4 }
+            ]
+        },
+        options: {
+            responsive:true,
+            maintainAspectRatio:false,
+            plugins:{legend:{display:false}},
+            scales:{
+                x:{title:{display:true,text:'Metric Strength',font:{size:10}},grid:{display:false}},
+                y:{title:{display:true,text:'Hall Voltage Signal',font:{size:10}},grid:{color:'#f1f5f9'}}
+            }
+        }
+    });
+
+    setMode('transport');
+    animate();
+</script>
+</body>
+</html>
