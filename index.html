@@ -304,3 +304,73 @@
 </script>
 </body>
 </html>
+;{(import ipywidgets as widgets
+from IPython.display import display, HTML
+
+# --- VEF Logic Engine ---
+def calculate_vef_state(nf_vol):
+    """
+    Simulates the Volumetric Swing.
+    nf_vol: The Negative Field volume (0 to 1)
+    """
+    # PP compensates (Simplex Constraint)
+    # We assume a small 'Void' buffer (psi_0) to prevent absolute zero
+    psi_0 = 0.01 
+    pp_vol = 1.0 - nf_vol - psi_0
+    
+    # Hierarchy Calculation: The ratio of separation (Inverse Scale)
+    if nf_vol > 0 and pp_vol > 0:
+        hierarchy = nf_vol / pp_vol
+    else:
+        hierarchy = float('inf')
+    
+    # Force Equivalents
+    # Strong Force increases as PP density increases (NF approaches 0)
+    strong_force = 1.0 / (nf_vol + 1e-10)
+    # Weak Force decreases as the NF clamp thins
+    weak_force = nf_vol * 10
+    
+    return pp_vol, hierarchy, strong_force, weak_force
+
+# --- UI Components ---
+title = HTML("<h2>VEF Volumetric Symmetry Solver</h2><p>Adjust NF to see the PP reaction and Hierarchy Shift.</p>")
+
+nf_slider = widgets.FloatSlider(
+    value=0.5, min=0.01, max=0.98, step=0.01,
+    description='NF Volume:', continuous_update=True,
+    style={'description_width': 'initial'}, layout={'width': '400px'}
+)
+
+output = widgets.Output()
+
+def update_view(change):
+    nf_val = change['new']
+    pp_val, h_ratio, sf, wf = calculate_vef_state(nf_val)
+    
+    # Determine the 'Swing Position'
+    if 0.48 <= nf_val <= 0.52:
+        state = "<b style='color:green;'>SYMMETRY (High Kinetic / Low Potential)</b>"
+    elif nf_val < 0.3:
+        state = "<b style='color:red;'>DISPLACEMENT (High Density / Matter Phase)</b>"
+    else:
+        state = "<b style='color:blue;'>EXPANSION (High NF / Gravity Dominant)</b>"
+
+    with output:
+        output.clear_output()
+        print(f"Current State: {state}")
+        print("-" * 40)
+        print(f"PP Volume (Density): {pp_val:.4f}")
+        print(f"Hierarchy Ratio:     {h_ratio:.2e}")
+        print(f"Strong Force Index:  {sf:.2e} (Resistance to Zero)")
+        print(f"Weak Force Index:    {wf:.4f} (Clamp Integrity)")
+        print("-" * 40)
+        print("Logic: 3rd Law Prohibits Zero Fulcrum. Resistance increases as NF -> 0.")
+
+nf_slider.observe(update_view, names='value')
+
+# Display everything
+display(title, nf_slider, output)
+
+# Initialize
+update_view({'new': 0.5});
+        
